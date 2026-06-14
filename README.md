@@ -540,14 +540,19 @@ Importe:
 
 ```text
 docs/postman/gestao-restaurante.postman_collection.json
+docs/postman/gestao-restaurante-local.postman_environment.json
 ```
 
-A collection utiliza:
+Selecione o environment **Gestão de Restaurantes - Local** antes de executar
+as requisições. A collection utiliza:
 
 - `{{base_url}}`: URL da aplicação.
 - `{{token}}`: variável preparada para autenticação futura.
 - IDs de tipos, usuários, restaurantes e itens.
 - Exemplos de sucesso e erro em cada operação aplicável.
+
+Execute as pastas na ordem apresentada. As requisições de criação armazenam
+automaticamente os IDs necessários para as etapas seguintes.
 
 ### Com cURL
 

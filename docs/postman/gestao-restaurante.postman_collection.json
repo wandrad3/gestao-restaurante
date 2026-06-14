@@ -1,27 +1,80 @@
 {
   "info": {
-    "_postman_id": "4c77a9b2-baf4-4e75-ae8d-gestaorestaurante",
+    "_postman_id": "4c77a9b2-baf4-4e75-ae8d-0123456789ab",
     "name": "Gestão de Restaurantes API",
-    "description": "Collection da API v1. Cada requisição documenta exemplos de sucesso e os erros aplicáveis (400, 404 e 409).",
+    "description": "Collection da API v1 do Tech Challenge Fase 2. Execute as pastas na ordem: Tipos de usuário, Usuários, Restaurantes e Itens de cardápio. As requisições de criação salvam automaticamente os IDs nas variáveis da collection. Cada endpoint contém exemplos de sucesso e dos erros aplicáveis (400, 404 e 409). A API é pública nesta fase; a variável token permanece reservada para autenticação futura.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
-    "type": "bearer",
-    "bearer": [
-      { "key": "token", "value": "{{token}}", "type": "string" }
-    ]
+    "type": "noauth"
   },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const expectedStatusByMethod = {",
+          "  GET: 200,",
+          "  POST: 201,",
+          "  PUT: 200,",
+          "  PATCH: 204,",
+          "  DELETE: 204",
+          "};",
+          "",
+          "const expectedStatus = expectedStatusByMethod[pm.request.method];",
+          "if (expectedStatus) {",
+          "  pm.test(`Status ${expectedStatus}`, function () {",
+          "    pm.response.to.have.status(expectedStatus);",
+          "  });",
+          "}",
+          "",
+          "pm.test('Tempo de resposta menor que 2 segundos', function () {",
+          "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "const contentType = pm.response.headers.get('Content-Type') || '';",
+          "if (contentType.includes('application/json') && pm.response.text()) {",
+          "  pm.test('Resposta contém JSON válido', function () {",
+          "    pm.expect(function () { pm.response.json(); }).not.to.throw();",
+          "  });",
+          "}",
+          "",
+          "if (pm.request.method === 'POST' && pm.response.code === 201) {",
+          "  const response = pm.response.json();",
+          "  const path = pm.request.url.getPath();",
+          "  const idVariableByPath = {",
+          "    '/api/v1/user-types': 'user_type_id',",
+          "    '/api/v1/users': 'user_id',",
+          "    '/api/v1/restaurants': 'restaurant_id',",
+          "    '/api/v1/menu-items': 'menu_item_id'",
+          "  };",
+          "  const variableName = idVariableByPath[path];",
+          "  if (variableName && response.id) {",
+          "    pm.collectionVariables.set(variableName, response.id);",
+          "    if (pm.environment.name) {",
+          "      pm.environment.set(variableName, response.id);",
+          "    }",
+          "    console.log(`${variableName} salvo: ${response.id}`);",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
   "variable": [
     { "key": "base_url", "value": "http://localhost:8080" },
-    { "key": "token", "value": "" },
-    { "key": "user_type_id", "value": "1" },
-    { "key": "user_id", "value": "1" },
-    { "key": "restaurant_id", "value": "1" },
-    { "key": "menu_item_id", "value": "1" }
+    { "key": "token", "value": "", "description": "Reservado para autenticação futura." },
+    { "key": "user_type_id", "value": "", "description": "Preenchido ao criar um tipo de usuário." },
+    { "key": "user_id", "value": "", "description": "Preenchido ao criar um usuário." },
+    { "key": "restaurant_id", "value": "", "description": "Preenchido ao criar um restaurante." },
+    { "key": "menu_item_id", "value": "", "description": "Preenchido ao criar um item de cardápio." },
+    { "key": "nonexistent_id", "value": "999999", "description": "ID usado nos fluxos de recurso inexistente." }
   ],
   "item": [
     {
       "name": "Tipos de usuário",
+      "description": "Execute primeiro. O POST salva automaticamente a variável {{user_type_id}}.",
       "item": [
         {
           "name": "Criar tipo",
@@ -80,6 +133,7 @@
     },
     {
       "name": "Usuários",
+      "description": "Requer {{user_type_id}}. O POST salva automaticamente a variável {{user_id}}.",
       "item": [
         {
           "name": "Criar usuário",
@@ -113,7 +167,12 @@
         },
         {
           "name": "Buscar usuários por nome",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/users/search?name=Sil", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "search"], "query": [{ "key": "name", "value": "Sil" }] } },
+          "request": {
+            "description": "Busca parcial e case-insensitive. Altere o parâmetro para um termo inexistente e a API retornará [] com status 200.",
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/api/v1/users/search?name=RIA", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "search"], "query": [{ "key": "name", "value": "RIA", "description": "Trecho do nome, sem diferenciação de caixa." }] }
+          },
           "response": [
             { "name": "200 - Resultado parcial sem diferenciar caixa", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]" },
             { "name": "200 - Nenhum resultado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[]" }
@@ -161,6 +220,7 @@
     },
     {
       "name": "Restaurantes",
+      "description": "Requer {{user_id}}. O POST salva automaticamente a variável {{restaurant_id}}.",
       "item": [
         {
           "name": "Criar restaurante",
@@ -218,6 +278,7 @@
     },
     {
       "name": "Itens de cardápio",
+      "description": "Requer {{restaurant_id}}. O POST salva automaticamente a variável {{menu_item_id}}.",
       "item": [
         {
           "name": "Criar item",
