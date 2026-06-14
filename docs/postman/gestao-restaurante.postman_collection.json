@@ -1,0 +1,277 @@
+{
+  "info": {
+    "_postman_id": "4c77a9b2-baf4-4e75-ae8d-gestaorestaurante",
+    "name": "Gestão de Restaurantes API",
+    "description": "Collection da API v1. Cada requisição documenta exemplos de sucesso e os erros aplicáveis (400, 404 e 409).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "user_type_id", "value": "1" },
+    { "key": "user_id", "value": "1" },
+    { "key": "restaurant_id", "value": "1" },
+    { "key": "menu_item_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Tipos de usuário",
+      "item": [
+        {
+          "name": "Criar tipo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Cliente\"}" },
+            "url": { "raw": "{{base_url}}/api/v1/user-types", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types"] }
+          },
+          "response": [
+            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cliente\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"name\":\"must not be blank\"}}" },
+            { "name": "409 - Nome duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Já existe um tipo de usuário com esse nome\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Listar tipos",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/user-types", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types"] } },
+          "response": [
+            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Cliente\"}]" }
+          ]
+        },
+        {
+          "name": "Buscar tipo por ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/user-types/{{user_type_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types", "{{user_type_id}}"] } },
+          "response": [
+            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cliente\"}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Atualizar tipo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Dono de Restaurante\"}" },
+            "url": { "raw": "{{base_url}}/api/v1/user-types/{{user_type_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types", "{{user_type_id}}"] }
+          },
+          "response": [
+            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Dono de Restaurante\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"name\":\"must not be blank\"}}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" },
+            { "name": "409 - Nome duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Já existe um tipo de usuário com esse nome\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Excluir tipo",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/user-types/{{user_type_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types", "{{user_type_id}}"] } },
+          "response": [
+            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" },
+            { "name": "409 - Tipo em uso", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"A operação viola uma restrição de integridade\",\"fields\":{}}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuários",
+      "item": [
+        {
+          "name": "Criar usuário",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"password\":\"Senha123\",\"street\":\"Rua A\",\"number\":\"10\",\"city\":\"São Paulo\",\"state\":\"SP\",\"zipCode\":\"01001-000\",\"userTypeId\":{{user_type_id}}}" },
+            "url": { "raw": "{{base_url}}/api/v1/users", "host": ["{{base_url}}"], "path": ["api", "v1", "users"] }
+          },
+          "response": [
+            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"street\":\"Rua A\",\"number\":\"10\",\"city\":\"São Paulo\",\"state\":\"SP\",\"zipCode\":\"01001-000\",\"userType\":{\"id\":1,\"name\":\"Cliente\"},\"updatedAt\":\"2026-06-14T12:00:00-03:00\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"email\":\"must be a well-formed email address\"}}" },
+            { "name": "404 - Tipo inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" },
+            { "name": "409 - E-mail duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"E-mail já cadastrado\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Listar usuários",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/users", "host": ["{{base_url}}"], "path": ["api", "v1", "users"] } },
+          "response": [
+            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]" }
+          ]
+        },
+        {
+          "name": "Buscar usuário por ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}"] } },
+          "response": [
+            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Buscar usuários por nome",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/users/search?name=Sil", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "search"], "query": [{ "key": "name", "value": "Sil" }] } },
+          "response": [
+            { "name": "200 - Resultado parcial sem diferenciar caixa", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]" },
+            { "name": "200 - Nenhum resultado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[]" }
+          ]
+        },
+        {
+          "name": "Atualizar usuário",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"username\":\"maria.souza\",\"street\":\"Rua B\",\"number\":\"20\",\"city\":\"São Paulo\",\"state\":\"SP\",\"zipCode\":\"01002-000\",\"userTypeId\":{{user_type_id}}}" },
+            "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}"] }
+          },
+          "response": [
+            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"username\":\"maria.souza\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"state\":\"must match [A-Za-z]{2}\"}}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" },
+            { "name": "409 - E-mail duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"E-mail já cadastrado\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Alterar senha",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"password\":\"NovaSenha123\"}" },
+            "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}/password", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}", "password"] }
+          },
+          "response": [
+            { "name": "204 - Senha alterada", "status": "No Content", "code": 204, "header": [], "body": "" },
+            { "name": "400 - Senha inválida", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"password\":\"size must be between 8 and 100\"}}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Excluir usuário",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}"] } },
+          "response": [
+            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" },
+            { "name": "409 - Usuário possui restaurante", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Usuário é dono de um restaurante e não pode ser removido\",\"fields\":{}}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Restaurantes",
+      "item": [
+        {
+          "name": "Criar restaurante",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":{{user_id}}}" },
+            "url": { "raw": "{{base_url}}/api/v1/restaurants", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants"] }
+          },
+          "response": [
+            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"name\":\"must not be blank\"}}" },
+            { "name": "404 - Dono inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Listar restaurantes",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/restaurants", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants"] } },
+          "response": [
+            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Cantina FIAP\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}]" }
+          ]
+        },
+        {
+          "name": "Buscar restaurante por ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants", "{{restaurant_id}}"] } },
+          "response": [
+            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Atualizar restaurante",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"name\":\"Cantina FIAP Centro\",\"address\":\"Rua Central, 10\",\"cuisineType\":\"Italiana\",\"openingHours\":\"10:00-22:00\",\"ownerId\":{{user_id}}}" },
+            "url": { "raw": "{{base_url}}/api/v1/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants", "{{restaurant_id}}"] }
+          },
+          "response": [
+            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cantina FIAP Centro\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"openingHours\":\"must not be blank\"}}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Excluir restaurante",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants", "{{restaurant_id}}"] } },
+          "response": [
+            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" },
+            { "name": "409 - Possui itens", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Restaurante possui itens de cardápio e não pode ser removido\",\"fields\":{}}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Itens de cardápio",
+      "item": [
+        {
+          "name": "Criar item",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"restaurantId\":{{restaurant_id}},\"name\":\"Lasanha\",\"description\":\"Lasanha à bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu-items", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items"] }
+          },
+          "response": [
+            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"description\":\"Lasanha à bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"price\":\"must be greater than or equal to 0.0\"}}" },
+            { "name": "404 - Restaurante inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Listar itens",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/menu-items?restaurantId={{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items"], "query": [{ "key": "restaurantId", "value": "{{restaurant_id}}" }] } },
+          "response": [
+            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"price\":39.90,\"dineInOnly\":false}]" },
+            { "name": "404 - Filtro de restaurante inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Buscar item por ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/menu-items/{{menu_item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items", "{{menu_item_id}}"] } },
+          "response": [
+            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"description\":\"Lasanha à bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardápio não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Atualizar item",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"restaurantId\":{{restaurant_id}},\"name\":\"Lasanha Grande\",\"description\":\"Serve duas pessoas\",\"price\":59.90,\"dineInOnly\":true,\"photoPath\":\"/images/lasanha-grande.jpg\"}" },
+            "url": { "raw": "{{base_url}}/api/v1/menu-items/{{menu_item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items", "{{menu_item_id}}"] }
+          },
+          "response": [
+            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha Grande\",\"description\":\"Serve duas pessoas\",\"price\":59.90,\"dineInOnly\":true,\"photoPath\":\"/images/lasanha-grande.jpg\"}" },
+            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"photoPath\":\"must not be blank\"}}" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardápio não encontrado: 999\",\"fields\":{}}" }
+          ]
+        },
+        {
+          "name": "Excluir item",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/menu-items/{{menu_item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items", "{{menu_item_id}}"] } },
+          "response": [
+            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
+            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardápio não encontrado: 999\",\"fields\":{}}" }
+          ]
+        }
+      ]
+    }
+  ]
+}
