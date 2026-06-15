@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Técnico - Gestão de Restaurantes</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #263238;
+            background: #f4f7fa;
+        }
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 48px;
+        }
+        h1, h2, h3 { color: #174f86; }
+        h1 { border-bottom: 4px solid #174f86; padding-bottom: 12px; }
+        h2 { margin-top: 40px; border-bottom: 1px solid #b8c7d9; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
+        th { background: #174f86; color: white; }
+        code, pre {
+            font-family: Consolas, Monaco, monospace;
+            background: #eef2f7;
+        }
+        code { padding: 2px 5px; }
+        pre { padding: 16px; overflow-x: auto; border-left: 4px solid #174f86; }
+        .cover {
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+        .status {
+            border-left: 5px solid #2e7d32;
+            background: #edf7ed;
+            padding: 14px;
+        }
+        .warning {
+            border-left: 5px solid #ed6c02;
+            background: #fff4e5;
+            padding: 14px;
+        }
+        @media print {
+            body { background: white; }
+            main { max-width: none; padding: 24px; }
+            h2 { break-after: avoid; }
+            table, pre { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <section class="cover">
+        <h1>Gestão de Restaurantes API</h1>
+        <h2>Relatório Técnico - Tech Challenge Fase 2</h2>
+        <p>Java 21, Spring Boot 3, PostgreSQL 16 e Clean Architecture</p>
+        <p>
+            <strong>Repositório:</strong>
+            <a href="https://github.com/wandrad3/gestao-restaurante">
+                github.com/wandrad3/gestao-restaurante
+            </a><br>
+            <strong>Data:</strong> 15 de junho de 2026<br>
+            <strong>Versão:</strong> 0.0.1-SNAPSHOT
+        </p>
+    </section>
+
+    <h1>1. Visão Geral</h1>
+    <p>
+        A aplicação fornece uma API REST para gerenciar tipos de usuário,
+        usuários, restaurantes e itens de cardápio. O projeto utiliza separação
+        entre domínio, aplicação e infraestrutura, persistência relacional com
+        PostgreSQL, migrations Flyway, documentação OpenAPI, testes automatizados
+        e execução integrada com Docker Compose.
+    </p>
+
+    <h2>Requisitos atendidos</h2>
+    <ul>
+        <li>CRUD de tipos de usuário, restaurantes e itens de cardápio.</li>
+        <li>Associação entre tipo de usuário, usuário, restaurante e cardápio.</li>
+        <li>Busca parcial e case-insensitive de usuários por nome.</li>
+        <li>Erros HTTP padronizados para validação, ausência e conflito.</li>
+        <li>Testes unitários e de integração com gate JaCoCo de 80%.</li>
+        <li>Dockerfile multi-stage e Docker Compose com healthcheck.</li>
+        <li>Collection e environment Postman.</li>
+        <li>Pipeline de integração contínua e abertura automática de PR.</li>
+    </ul>
+
+    <h1>2. Arquitetura</h1>
+    <pre>HTTP Request
+    |
+    v
+Infrastructure / Web (Controllers, DTOs, Exception Handler)
+    |
+    v
+Application / Services (casos de uso e regras)
+    |
+    v
+Domain / Model (UserType, User, Restaurant, MenuItem)
+    |
+    v
+Infrastructure / Persistence (Spring Data JPA)
+    |
+    v
+PostgreSQL 16</pre>
+
+    <table>
+        <thead>
+        <tr><th>Camada</th><th>Responsabilidade</th></tr>
+        </thead>
+        <tbody>
+        <tr><td>Domain</td><td>Entidades e comportamento central.</td></tr>
+        <tr><td>Application</td><td>Casos de uso, vínculos e regras de conflito.</td></tr>
+        <tr><td>Infrastructure Web</td><td>API REST, validação e respostas HTTP.</td></tr>
+        <tr><td>Infrastructure Persistence</td><td>Repositórios JPA e queries.</td></tr>
+        </tbody>
+    </table>
+
+    <h1>3. Persistência e Infraestrutura</h1>
+    <p>
+        O PostgreSQL 16 foi escolhido por oferecer consistência ACID e suporte
+        natural aos relacionamentos do domínio. O Flyway aplica a migration
+        <code>V1__create_initial_schema.sql</code>. O Hibernate opera com
+        <code>ddl-auto=validate</code>, evitando alterações implícitas no schema.
+    </p>
+    <p>
+        O Docker Compose fornece os serviços <code>app</code> e <code>db</code>.
+        A aplicação aguarda o healthcheck do PostgreSQL, enquanto os dados são
+        mantidos em volume persistente.
+    </p>
+
+    <h1>4. Testes e Qualidade</h1>
+    <p>
+        A suíte combina JUnit 5, Mockito, MockMvc, H2 e testes de integração.
+        A busca por nome cobre nome exato, trecho parcial, diferença entre
+        maiúsculas/minúsculas e ausência de resultado. O JaCoCo bloqueia o build
+        quando a cobertura por instruções fica abaixo de 80%.
+    </p>
+    <div class="status">
+        <strong>Comando de validação:</strong>
+        <code>./mvnw clean verify -B</code>
+    </div>
+
+    <h1>5. Pipeline de Integração Contínua</h1>
+    <p>
+        O workflow <code>.github/workflows/ci.yml</code> foi adaptado da Fase 1
+        para Java 21 e para o modelo atual. O objetivo é permitir que cada
+        colaborador trabalhe em sua própria branch, faça push e receba uma PR
+        automática somente após a validação da pipeline.
+    </p>
+
+    <h2>Branches monitoradas</h2>
+    <ul>
+        <li><code>feature/**</code>: novas funcionalidades.</li>
+        <li><code>bugfix/**</code>: correções de defeitos.</li>
+        <li><code>hotfix/**</code>: correções urgentes.</li>
+        <li><code>chore/**</code>: manutenção e infraestrutura.</li>
+        <li><code>refactor/**</code>: refatorações.</li>
+    </ul>
+    <p>
+        Pull requests abertas para <code>develop</code> ou <code>main</code>
+        também executam a validação. O evento <code>workflow_dispatch</code>
+        permite execução manual.
+    </p>
+
+    <h2>Jobs</h2>
+    <table>
+        <thead>
+        <tr><th>Job</th><th>Dependência</th><th>Resultado esperado</th></tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>build-test</code></td>
+            <td>Nenhuma</td>
+            <td>Compila em Java 21, executa testes e valida cobertura >= 80%.</td>
+        </tr>
+        <tr>
+            <td><code>sonar</code></td>
+            <td><code>build-test</code></td>
+            <td>Executa SonarCloud quando secrets e variables estão configurados.</td>
+        </tr>
+        <tr>
+            <td><code>create-pr</code></td>
+            <td><code>build-test</code> e <code>sonar</code></td>
+            <td>Cria uma PR da branch do colaborador para <code>develop</code>.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2>Fluxo operacional</h2>
+    <pre>main
+  |
+  +-- develop
+        |
+        +-- feature/minha-funcionalidade
+              |
+              +-- push
+                    |
+                    +-- build + testes + JaCoCo
+                    +-- SonarCloud (opcional)
+                    +-- PR automática para develop</pre>
+
+    <ol>
+        <li>O colaborador atualiza sua branch a partir de <code>develop</code>.</li>
+        <li>Cria uma branch com um dos prefixos monitorados.</li>
+        <li>Implementa, testa, faz commit e push.</li>
+        <li>O GitHub Actions executa o workflow.</li>
+        <li>Se os testes ou a cobertura falharem, nenhuma PR é criada.</li>
+        <li>Se a pipeline passar, a PR para <code>develop</code> é criada.</li>
+        <li>Novos pushes atualizam a mesma PR e reexecutam os checks.</li>
+    </ol>
+
+    <h2>Artefatos</h2>
+    <ul>
+        <li>Relatório JaCoCo mantido por 14 dias.</li>
+        <li>Relatórios Surefire mantidos por 7 dias.</li>
+    </ul>
+
+    <h2>SonarCloud</h2>
+    <p>O SonarCloud é opcional. Quando habilitado, requer:</p>
+    <table>
+        <thead>
+        <tr><th>Tipo</th><th>Nome</th><th>Conteúdo</th></tr>
+        </thead>
+        <tbody>
+        <tr><td>Secret</td><td><code>SONAR_TOKEN</code></td><td>Token gerado no SonarCloud.</td></tr>
+        <tr><td>Variable</td><td><code>SONAR_PROJECT_KEY</code></td><td>Chave do projeto.</td></tr>
+        <tr><td>Variable</td><td><code>SONAR_ORGANIZATION</code></td><td>Organização do SonarCloud.</td></tr>
+        </tbody>
+    </table>
+    <p>
+        Sem essa configuração, o job registra um aviso e termina com sucesso,
+        sem impedir a criação da PR.
+    </p>
+
+    <h1>6. Configuração Necessária no GitHub</h1>
+    <div class="warning">
+        O arquivo do workflow não consegue alterar sozinho as políticas do
+        repositório. As configurações abaixo devem ser feitas por um
+        administrador no GitHub.
+    </div>
+    <ol>
+        <li>
+            Em <strong>Settings &gt; Actions &gt; General &gt; Workflow
+            permissions</strong>, selecionar <strong>Read and write
+            permissions</strong>.
+        </li>
+        <li>
+            Marcar <strong>Allow GitHub Actions to create and approve pull
+            requests</strong>.
+        </li>
+        <li>
+            Criar ou confirmar a branch <code>develop</code>. O workflow tenta
+            criá-la a partir de <code>main</code> quando ausente.
+        </li>
+        <li>
+            Criar rulesets para <code>develop</code> e <code>main</code>,
+            exigindo pull request e o check
+            <code>Build, tests and coverage</code>.
+        </li>
+        <li>
+            Desabilitar push direto em <code>develop</code> e
+            <code>main</code>, exceto para administradores quando necessário.
+        </li>
+        <li>
+            Opcionalmente configurar o SonarCloud com o secret e as variables
+            descritas acima.
+        </li>
+    </ol>
+
+    <h1>7. Riscos e Controles</h1>
+    <table>
+        <thead>
+        <tr><th>Risco</th><th>Controle</th></tr>
+        </thead>
+        <tbody>
+        <tr><td>PR criada com testes falhando.</td><td>Dependência explícita do job <code>build-test</code>.</td></tr>
+        <tr><td>Cobertura abaixo do mínimo.</td><td>Gate JaCoCo de 80% no Maven.</td></tr>
+        <tr><td>PR duplicada.</td><td>Consulta de PR aberta antes de criar outra.</td></tr>
+        <tr><td>Execuções concorrentes obsoletas.</td><td>Cancelamento por branch via <code>concurrency</code>.</td></tr>
+        <tr><td>Secrets expostos por forks.</td><td>Sonar limitado a branches internas.</td></tr>
+        <tr><td>Merge sem revisão.</td><td>Ruleset exigindo PR e aprovação.</td></tr>
+        </tbody>
+    </table>
+
+    <h1>8. Conclusão</h1>
+    <p>
+        A pipeline transforma o push em uma validação reproduzível e impede a
+        abertura automática de PR quando compilação, testes ou cobertura
+        falham. A separação entre branches de trabalho, <code>develop</code> e
+        <code>main</code> estabelece um fluxo colaborativo com revisão antes da
+        integração e da entrega.
+    </p>
+</main>
+</body>
+</html>

@@ -18,6 +18,7 @@ testes automatizados e infraestrutura Docker.
 - [Erros comuns](#-erros-comuns)
 - [Documentação Swagger](#-documentação-swagger)
 - [Testando a aplicação](#-testando-a-aplicação)
+- [Pipeline CI e fluxo de branches](#-pipeline-ci-e-fluxo-de-branches)
 - [Validações implementadas](#-validações-implementadas)
 - [Suporte e problemas](#-suporte-e-problemas)
 
@@ -565,6 +566,113 @@ curl -X POST http://localhost:8080/api/v1/user-types \
 ```bash
 curl "http://localhost:8080/api/v1/users/search?name=maria"
 ```
+
+## 🔄 Pipeline CI e fluxo de branches
+
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) executa os
+testes e abre automaticamente uma pull request para `develop` quando um
+colaborador faz push em uma branch monitorada.
+
+O detalhamento arquitetural e operacional também está disponível em
+[`Relatorio_Tecnico.html`](Relatorio_Tecnico.html).
+
+### Branches monitoradas
+
+| Prefixo | Uso |
+|---|---|
+| `feature/**` | Novas funcionalidades |
+| `bugfix/**` | Correções de defeitos |
+| `hotfix/**` | Correções urgentes |
+| `chore/**` | Manutenção, documentação e infraestrutura |
+| `refactor/**` | Refatorações sem mudança funcional |
+
+Pull requests abertas para `develop` ou `main` também executam a pipeline.
+O workflow pode ser iniciado manualmente pela opção **Run workflow** do GitHub
+Actions.
+
+### Jobs executados
+
+1. **Build, tests and coverage**
+   - Configura o JDK 21.
+   - Executa `./mvnw clean verify -B`.
+   - Roda testes unitários e de integração.
+   - Exige cobertura JaCoCo por instruções maior ou igual a 80%.
+   - Publica os relatórios JaCoCo e Surefire como artefatos.
+2. **SonarCloud analysis**
+   - Executa depois dos testes.
+   - Analisa cobertura, qualidade e vulnerabilidades quando configurado.
+   - Sem configuração do SonarCloud, registra um aviso e não bloqueia o fluxo.
+3. **Create PR to develop**
+   - Executa somente em pushes de branches monitoradas.
+   - Requer sucesso nos testes e no job do SonarCloud.
+   - Cria `develop` a partir de `main` quando essa branch ainda não existe.
+   - Evita criar PR duplicada para a mesma branch.
+   - Abre a PR da branch do colaborador para `develop`.
+
+Se compilação, testes ou cobertura falharem, a PR automática não será criada.
+Novos pushes na mesma branch atualizam a PR existente e executam novamente os
+checks.
+
+### Fluxo de trabalho dos colaboradores
+
+Atualize a branch de desenvolvimento:
+
+```bash
+git switch develop
+git pull origin develop
+```
+
+Crie uma branch:
+
+```bash
+git switch -c feature/nome-da-funcionalidade
+```
+
+Após implementar e testar:
+
+```bash
+git add <arquivos>
+git commit -m "feat: descreve a funcionalidade"
+git push -u origin feature/nome-da-funcionalidade
+```
+
+O push inicia a pipeline. Após a aprovação dos checks, o GitHub Actions abre a
+PR para `develop`.
+
+### Configuração obrigatória do repositório
+
+Um administrador deve configurar no GitHub:
+
+1. Acesse **Settings > Actions > General**.
+2. Em **Workflow permissions**, selecione **Read and write permissions**.
+3. Marque **Allow GitHub Actions to create and approve pull requests**.
+4. Crie rulesets ou regras de proteção para `develop` e `main`.
+5. Exija pull request antes do merge.
+6. Exija o status check **Build, tests and coverage**.
+7. Bloqueie push direto em `develop` e `main`.
+8. Defina ao menos uma aprovação, se desejado pelo grupo.
+
+O workflow tem permissão para criar `develop` automaticamente, mas a criação
+manual inicial também pode ser feita com:
+
+```bash
+git switch main
+git pull origin main
+git switch -c develop
+git push -u origin develop
+```
+
+### SonarCloud opcional
+
+Para ativar a análise, configure:
+
+| Local | Nome | Descrição |
+|---|---|---|
+| Actions secret | `SONAR_TOKEN` | Token gerado no SonarCloud |
+| Actions variable | `SONAR_PROJECT_KEY` | Chave do projeto |
+| Actions variable | `SONAR_ORGANIZATION` | Organização do SonarCloud |
+
+Esses valores ficam em **Settings > Secrets and variables > Actions**.
 
 ## 🛠️ Desenvolvimento
 
