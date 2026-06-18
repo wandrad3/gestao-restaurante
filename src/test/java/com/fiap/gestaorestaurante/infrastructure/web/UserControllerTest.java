@@ -1,6 +1,7 @@
 package com.fiap.gestaorestaurante.infrastructure.web;
 
 import com.fiap.gestaorestaurante.application.service.UserService;
+import com.fiap.gestaorestaurante.infrastructure.web.config.SecurityConfig;
 import com.fiap.gestaorestaurante.infrastructure.web.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

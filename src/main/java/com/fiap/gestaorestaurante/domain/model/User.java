@@ -1,5 +1,6 @@
 package com.fiap.gestaorestaurante.domain.model;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,12 +12,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,7 +97,9 @@ public class User {
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getEmail() { return email; }
-    public String getUsername() { return username; }
+    //public String getUsername() { return username; }
+    public String getUser() {return username;}
+
     public String getStreet() { return street; }
     public String getNumber() { return number; }
     public String getCity() { return city; }
@@ -99,4 +107,20 @@ public class User {
     public String getZipCode() { return zipCode; }
     public UserType getUserType() { return userType; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(userType.toString()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
 }
