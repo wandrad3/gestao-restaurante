@@ -123,7 +123,9 @@ public class TokenService {
 
     private User instantiateUser() {
         try {
-            return User.class.getDeclaredConstructor().newInstance();
+            var constructor = User.class.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
         } catch (Exception e) {
             log.debug("Falha ao instanciar User por reflexão: {}", e.getMessage());
             return null;

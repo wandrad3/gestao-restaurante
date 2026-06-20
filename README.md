@@ -41,7 +41,7 @@ testes automatizados e infraestrutura Docker.
 
 ### Stack tecnológico
 
-- Java 21
+- Java 17
 - Spring Boot 3.4.5
 - Spring Web
 - Spring Data JPA e Hibernate
@@ -59,7 +59,7 @@ testes automatizados e infraestrutura Docker.
 
 ### Instalação local
 
-- Java 21+
+- Java 17+
 - Maven 3.9+ ou Maven Wrapper
 - PostgreSQL 16+
 - Git
@@ -102,7 +102,7 @@ docker compose up --build
 
 O Docker Compose irá:
 
-- Construir a aplicação em Java 21 com um Dockerfile multi-stage.
+- Construir a aplicação em Java 17 com um Dockerfile multi-stage.
 - Criar e iniciar o PostgreSQL 16.
 - Executar o healthcheck do banco.
 - Iniciar a aplicação somente quando o banco estiver saudável.
@@ -593,7 +593,7 @@ Actions.
 ### Jobs executados
 
 1. **Build, tests and coverage**
-   - Configura o JDK 21.
+   - Configura o JDK 17.
    - Executa `./mvnw clean verify -B`.
    - Roda testes unitários e de integração.
    - Exige cobertura JaCoCo por instruções maior ou igual a 80%.
@@ -651,6 +651,17 @@ Um administrador deve configurar no GitHub:
 6. Exija o status check **Build, tests and coverage**.
 7. Bloqueie push direto em `develop` e `main`.
 8. Defina ao menos uma aprovação, se desejado pelo grupo.
+
+Os rulesets prontos devem ser importados separadamente:
+
+```text
+.github/rulesets/develop.json
+.github/rulesets/main.json
+```
+
+Na página **Settings > Rules > Rulesets**, use **Import a ruleset** uma vez
+para cada arquivo. A interface do GitHub não aceita um único JSON contendo
+vários rulesets.
 
 O workflow tem permissão para criar `develop` automaticamente, mas a criação
 manual inicial também pode ser feita com:
