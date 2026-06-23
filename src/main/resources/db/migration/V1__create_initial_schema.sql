@@ -4,6 +4,7 @@ CREATE TABLE user_types (
     CONSTRAINT uk_user_types_name UNIQUE (name)
 );
 
+
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,

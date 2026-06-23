@@ -61,7 +61,7 @@
     <section class="cover">
         <h1>Gestão de Restaurantes API</h1>
         <h2>Relatório Técnico - Tech Challenge Fase 2</h2>
-        <p>Java 21, Spring Boot 3, PostgreSQL 16 e Clean Architecture</p>
+        <p>Java 17, Spring Boot 3, PostgreSQL 16 e Clean Architecture</p>
         <p>
             <strong>Repositório:</strong>
             <a href="https://github.com/wandrad3/gestao-restaurante">
@@ -151,7 +151,7 @@ PostgreSQL 16</pre>
     <h1>5. Pipeline de Integração Contínua</h1>
     <p>
         O workflow <code>.github/workflows/ci.yml</code> foi adaptado da Fase 1
-        para Java 21 e para o modelo atual. O objetivo é permitir que cada
+        para Java 17 e para o modelo atual. O objetivo é permitir que cada
         colaborador trabalhe em sua própria branch, faça push e receba uma PR
         automática somente após a validação da pipeline.
     </p>
@@ -179,7 +179,7 @@ PostgreSQL 16</pre>
         <tr>
             <td><code>build-test</code></td>
             <td>Nenhuma</td>
-            <td>Compila em Java 21, executa testes e valida cobertura >= 80%.</td>
+            <td>Compila em Java 17, executa testes e valida cobertura >= 80%.</td>
         </tr>
         <tr>
             <td><code>sonar</code></td>
@@ -268,6 +268,13 @@ PostgreSQL 16</pre>
         <li>
             Desabilitar push direto em <code>develop</code> e
             <code>main</code>, exceto para administradores quando necessário.
+        </li>
+        <li>
+            Importar separadamente
+            <code>.github/rulesets/develop.json</code> e
+            <code>.github/rulesets/main.json</code> em
+            <strong>Settings &gt; Rules &gt; Rulesets</strong>. A interface não
+            aceita um agregador contendo dois rulesets.
         </li>
         <li>
             Opcionalmente configurar o SonarCloud com o secret e as variables

@@ -28,7 +28,7 @@ permissions:
   checks: read
 
 env:
-  JAVA_VERSION: "21"
+  JAVA_VERSION: "17"
   JAVA_DISTRIBUTION: temurin
   MAVEN_OPTS: -Xmx1024m
   SONAR_EXCLUSIONS: "**/dto/**,**/Application.java"
