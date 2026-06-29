@@ -1,7 +1,7 @@
-package com.fiap.gestaorestaurante.infrastructure.persistence;
+package com.fiap.gestaorestaurante.infra.database.jpa.repository;
 
-import com.fiap.gestaorestaurante.domain.model.User;
-import com.fiap.gestaorestaurante.domain.model.UserType;
+import com.fiap.gestaorestaurante.infra.database.jpa.entity.UserEntity;
+import com.fiap.gestaorestaurante.infra.database.jpa.entity.UserTypeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +22,14 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        UserType client = userTypeRepository.save(new UserType("Cliente"));
-        userRepository.save(new User(
-                "Maria da Silva", "maria@example.com", "maria", "encoded-password",
-                "Rua A", "10", "São Paulo", "SP", "01001-000", client
+        UserTypeEntity client = userTypeRepository.save(new UserTypeEntity(null, "Cliente"));
+        userRepository.save(new UserEntity(
+                null, "Maria da Silva", "maria@example.com", "maria", "encoded-password",
+                "Rua A", "10", "São Paulo", "SP", "01001-000", client, null
         ));
-        userRepository.save(new User(
-                "João Souza", "joao@example.com", "joao", "encoded-password",
-                "Rua B", "20", "São Paulo", "SP", "01002-000", client
+        userRepository.save(new UserEntity(
+                null, "João Souza", "joao@example.com", "joao", "encoded-password",
+                "Rua B", "20", "São Paulo", "SP", "01002-000", client, null
         ));
     }
 
@@ -53,7 +53,7 @@ class UserRepositoryTest {
         assertThat(userRepository.searchByName("Inexistente")).isEmpty();
     }
 
-    private void assertNames(List<User> users, String... names) {
-        assertThat(users).extracting(User::getName).containsExactly(names);
+    private void assertNames(List<UserEntity> users, String... names) {
+        assertThat(users).extracting(UserEntity::getName).containsExactly(names);
     }
 }

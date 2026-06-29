@@ -1,9 +1,9 @@
-package com.fiap.gestaorestaurante.application.service;
+package com.fiap.gestaorestaurante.infra.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.fiap.gestaorestaurante.domain.model.User;
-import com.fiap.gestaorestaurante.domain.model.UserType;
+import com.fiap.gestaorestaurante.core.domain.User;
+import com.fiap.gestaorestaurante.core.domain.UserType;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
