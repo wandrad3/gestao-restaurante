@@ -1,338 +1,1424 @@
 {
-  "info": {
-    "_postman_id": "4c77a9b2-baf4-4e75-ae8d-0123456789ab",
-    "name": "Gestão de Restaurantes API",
-    "description": "Collection da API v1 do Tech Challenge Fase 2. Execute as pastas na ordem: Tipos de usuário, Usuários, Restaurantes e Itens de cardápio. As requisições de criação salvam automaticamente os IDs nas variáveis da collection. Cada endpoint contém exemplos de sucesso e dos erros aplicáveis (400, 404 e 409). A API é pública nesta fase; a variável token permanece reservada para autenticação futura.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "auth": {
-    "type": "noauth"
-  },
-  "event": [
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "const expectedStatusByMethod = {",
-          "  GET: 200,",
-          "  POST: 201,",
-          "  PUT: 200,",
-          "  PATCH: 204,",
-          "  DELETE: 204",
-          "};",
-          "",
-          "const expectedStatus = expectedStatusByMethod[pm.request.method];",
-          "if (expectedStatus) {",
-          "  pm.test(`Status ${expectedStatus}`, function () {",
-          "    pm.response.to.have.status(expectedStatus);",
-          "  });",
-          "}",
-          "",
-          "pm.test('Tempo de resposta menor que 2 segundos', function () {",
-          "  pm.expect(pm.response.responseTime).to.be.below(2000);",
-          "});",
-          "",
-          "const contentType = pm.response.headers.get('Content-Type') || '';",
-          "if (contentType.includes('application/json') && pm.response.text()) {",
-          "  pm.test('Resposta contém JSON válido', function () {",
-          "    pm.expect(function () { pm.response.json(); }).not.to.throw();",
-          "  });",
-          "}",
-          "",
-          "if (pm.request.method === 'POST' && pm.response.code === 201) {",
-          "  const response = pm.response.json();",
-          "  const path = pm.request.url.getPath();",
-          "  const idVariableByPath = {",
-          "    '/api/v1/user-types': 'user_type_id',",
-          "    '/api/v1/users': 'user_id',",
-          "    '/api/v1/restaurants': 'restaurant_id',",
-          "    '/api/v1/menu-items': 'menu_item_id'",
-          "  };",
-          "  const variableName = idVariableByPath[path];",
-          "  if (variableName && response.id) {",
-          "    pm.collectionVariables.set(variableName, response.id);",
-          "    if (pm.environment.name) {",
-          "      pm.environment.set(variableName, response.id);",
-          "    }",
-          "    console.log(`${variableName} salvo: ${response.id}`);",
-          "  }",
-          "}"
-        ]
-      }
-    }
-  ],
-  "variable": [
-    { "key": "base_url", "value": "http://localhost:8080" },
-    { "key": "token", "value": "", "description": "Reservado para autenticação futura." },
-    { "key": "user_type_id", "value": "", "description": "Preenchido ao criar um tipo de usuário." },
-    { "key": "user_id", "value": "", "description": "Preenchido ao criar um usuário." },
-    { "key": "restaurant_id", "value": "", "description": "Preenchido ao criar um restaurante." },
-    { "key": "menu_item_id", "value": "", "description": "Preenchido ao criar um item de cardápio." },
-    { "key": "nonexistent_id", "value": "999999", "description": "ID usado nos fluxos de recurso inexistente." }
-  ],
-  "item": [
-    {
-      "name": "Tipos de usuário",
-      "description": "Execute primeiro. O POST salva automaticamente a variável {{user_type_id}}.",
-      "item": [
-        {
-          "name": "Criar tipo",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"name\":\"Cliente\"}" },
-            "url": { "raw": "{{base_url}}/api/v1/user-types", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types"] }
-          },
-          "response": [
-            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cliente\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"name\":\"must not be blank\"}}" },
-            { "name": "409 - Nome duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Já existe um tipo de usuário com esse nome\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Listar tipos",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/user-types", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types"] } },
-          "response": [
-            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Cliente\"}]" }
-          ]
-        },
-        {
-          "name": "Buscar tipo por ID",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/user-types/{{user_type_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types", "{{user_type_id}}"] } },
-          "response": [
-            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cliente\"}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Atualizar tipo",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"name\":\"Dono de Restaurante\"}" },
-            "url": { "raw": "{{base_url}}/api/v1/user-types/{{user_type_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types", "{{user_type_id}}"] }
-          },
-          "response": [
-            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Dono de Restaurante\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"name\":\"must not be blank\"}}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" },
-            { "name": "409 - Nome duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Já existe um tipo de usuário com esse nome\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Excluir tipo",
-          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/user-types/{{user_type_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "user-types", "{{user_type_id}}"] } },
-          "response": [
-            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" },
-            { "name": "409 - Tipo em uso", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"A operação viola uma restrição de integridade\",\"fields\":{}}" }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Usuários",
-      "description": "Requer {{user_type_id}}. O POST salva automaticamente a variável {{user_id}}.",
-      "item": [
-        {
-          "name": "Criar usuário",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"password\":\"Senha123\",\"street\":\"Rua A\",\"number\":\"10\",\"city\":\"São Paulo\",\"state\":\"SP\",\"zipCode\":\"01001-000\",\"userTypeId\":{{user_type_id}}}" },
-            "url": { "raw": "{{base_url}}/api/v1/users", "host": ["{{base_url}}"], "path": ["api", "v1", "users"] }
-          },
-          "response": [
-            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"street\":\"Rua A\",\"number\":\"10\",\"city\":\"São Paulo\",\"state\":\"SP\",\"zipCode\":\"01001-000\",\"userType\":{\"id\":1,\"name\":\"Cliente\"},\"updatedAt\":\"2026-06-14T12:00:00-03:00\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"email\":\"must be a well-formed email address\"}}" },
-            { "name": "404 - Tipo inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuário não encontrado: 999\",\"fields\":{}}" },
-            { "name": "409 - E-mail duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"E-mail já cadastrado\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Listar usuários",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/users", "host": ["{{base_url}}"], "path": ["api", "v1", "users"] } },
-          "response": [
-            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]" }
-          ]
-        },
-        {
-          "name": "Buscar usuário por ID",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}"] } },
-          "response": [
-            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Buscar usuários por nome",
-          "request": {
-            "description": "Busca parcial e case-insensitive. Altere o parâmetro para um termo inexistente e a API retornará [] com status 200.",
-            "method": "GET",
-            "header": [],
-            "url": { "raw": "{{base_url}}/api/v1/users/search?name=RIA", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "search"], "query": [{ "key": "name", "value": "RIA", "description": "Trecho do nome, sem diferenciação de caixa." }] }
-          },
-          "response": [
-            { "name": "200 - Resultado parcial sem diferenciar caixa", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]" },
-            { "name": "200 - Nenhum resultado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[]" }
-          ]
-        },
-        {
-          "name": "Atualizar usuário",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"username\":\"maria.souza\",\"street\":\"Rua B\",\"number\":\"20\",\"city\":\"São Paulo\",\"state\":\"SP\",\"zipCode\":\"01002-000\",\"userTypeId\":{{user_type_id}}}" },
-            "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}"] }
-          },
-          "response": [
-            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"username\":\"maria.souza\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"state\":\"must match [A-Za-z]{2}\"}}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" },
-            { "name": "409 - E-mail duplicado", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"E-mail já cadastrado\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Alterar senha",
-          "request": {
-            "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"password\":\"NovaSenha123\"}" },
-            "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}/password", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}", "password"] }
-          },
-          "response": [
-            { "name": "204 - Senha alterada", "status": "No Content", "code": 204, "header": [], "body": "" },
-            { "name": "400 - Senha inválida", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"password\":\"size must be between 8 and 100\"}}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Excluir usuário",
-          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "users", "{{user_id}}"] } },
-          "response": [
-            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" },
-            { "name": "409 - Usuário possui restaurante", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Usuário é dono de um restaurante e não pode ser removido\",\"fields\":{}}" }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Restaurantes",
-      "description": "Requer {{user_id}}. O POST salva automaticamente a variável {{restaurant_id}}.",
-      "item": [
-        {
-          "name": "Criar restaurante",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":{{user_id}}}" },
-            "url": { "raw": "{{base_url}}/api/v1/restaurants", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants"] }
-          },
-          "response": [
-            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"name\":\"must not be blank\"}}" },
-            { "name": "404 - Dono inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Usuário não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Listar restaurantes",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/restaurants", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants"] } },
-          "response": [
-            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"name\":\"Cantina FIAP\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}]" }
-          ]
-        },
-        {
-          "name": "Buscar restaurante por ID",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants", "{{restaurant_id}}"] } },
-          "response": [
-            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Atualizar restaurante",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"name\":\"Cantina FIAP Centro\",\"address\":\"Rua Central, 10\",\"cuisineType\":\"Italiana\",\"openingHours\":\"10:00-22:00\",\"ownerId\":{{user_id}}}" },
-            "url": { "raw": "{{base_url}}/api/v1/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants", "{{restaurant_id}}"] }
-          },
-          "response": [
-            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"name\":\"Cantina FIAP Centro\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"openingHours\":\"must not be blank\"}}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Excluir restaurante",
-          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/restaurants/{{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "restaurants", "{{restaurant_id}}"] } },
-          "response": [
-            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" },
-            { "name": "409 - Possui itens", "status": "Conflict", "code": 409, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Restaurante possui itens de cardápio e não pode ser removido\",\"fields\":{}}" }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Itens de cardápio",
-      "description": "Requer {{restaurant_id}}. O POST salva automaticamente a variável {{menu_item_id}}.",
-      "item": [
-        {
-          "name": "Criar item",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"restaurantId\":{{restaurant_id}},\"name\":\"Lasanha\",\"description\":\"Lasanha à bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}" },
-            "url": { "raw": "{{base_url}}/api/v1/menu-items", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items"] }
-          },
-          "response": [
-            { "name": "201 - Criado", "status": "Created", "code": 201, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"description\":\"Lasanha à bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"price\":\"must be greater than or equal to 0.0\"}}" },
-            { "name": "404 - Restaurante inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Listar itens",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/menu-items?restaurantId={{restaurant_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items"], "query": [{ "key": "restaurantId", "value": "{{restaurant_id}}" }] } },
-          "response": [
-            { "name": "200 - Lista", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "[{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"price\":39.90,\"dineInOnly\":false}]" },
-            { "name": "404 - Filtro de restaurante inexistente", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Buscar item por ID",
-          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/api/v1/menu-items/{{menu_item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items", "{{menu_item_id}}"] } },
-          "response": [
-            { "name": "200 - Encontrado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"description\":\"Lasanha à bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardápio não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Atualizar item",
-          "request": {
-            "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\"restaurantId\":{{restaurant_id}},\"name\":\"Lasanha Grande\",\"description\":\"Serve duas pessoas\",\"price\":59.90,\"dineInOnly\":true,\"photoPath\":\"/images/lasanha-grande.jpg\"}" },
-            "url": { "raw": "{{base_url}}/api/v1/menu-items/{{menu_item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items", "{{menu_item_id}}"] }
-          },
-          "response": [
-            { "name": "200 - Atualizado", "status": "OK", "code": 200, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha Grande\",\"description\":\"Serve duas pessoas\",\"price\":59.90,\"dineInOnly\":true,\"photoPath\":\"/images/lasanha-grande.jpg\"}" },
-            { "name": "400 - Payload inválido", "status": "Bad Request", "code": 400, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload inválido\",\"fields\":{\"photoPath\":\"must not be blank\"}}" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardápio não encontrado: 999\",\"fields\":{}}" }
-          ]
-        },
-        {
-          "name": "Excluir item",
-          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/api/v1/menu-items/{{menu_item_id}}", "host": ["{{base_url}}"], "path": ["api", "v1", "menu-items", "{{menu_item_id}}"] } },
-          "response": [
-            { "name": "204 - Excluído", "status": "No Content", "code": 204, "header": [], "body": "" },
-            { "name": "404 - Não encontrado", "status": "Not Found", "code": 404, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardápio não encontrado: 999\",\"fields\":{}}" }
-          ]
-        }
-      ]
-    }
-  ]
+    "info":  {
+                 "_postman_id":  "4c77a9b2-baf4-4e75-ae8d-0123456789ab",
+                 "name":  "GestÃ£o de Restaurantes API",
+                 "description":  "Collection da API v1 do Tech Challenge Fase 2. Execute as pastas na ordem: Tipos de usuario, Usuarios, Restaurantes e Itens de cardapio. As requisicoes de criacao salvam automaticamente os IDs nas variaveis da collection. A requisicao de login salva automaticamente o JWT em {{token}}. Cada endpoint contem exemplos de sucesso e dos erros aplicaveis (400, 401, 404 e 409).",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "auth":  {
+                 "type":  "noauth"
+             },
+    "event":  [
+                  {
+                      "listen":  "test",
+                      "script":  {
+                                     "type":  "text/javascript",
+                                     "exec":  [
+                                                  "const expectedStatusByMethod = {",
+                                                  "  GET: 200,",
+                                                  "  POST: 201,",
+                                                  "  PUT: 200,",
+                                                  "  PATCH: 204,",
+                                                  "  DELETE: 204",
+                                                  "};",
+                                                  "",
+                                                  "const path = pm.request.url.getPath();",
+                                                  "const expectedStatus = path === \u0027/api/v1/users/login\u0027 ? 200 : expectedStatusByMethod[pm.request.method];",
+                                                  "if (expectedStatus) {",
+                                                  "  pm.test(`Status ${expectedStatus}`, function () {",
+                                                  "    pm.response.to.have.status(expectedStatus);",
+                                                  "  });",
+                                                  "}",
+                                                  "",
+                                                  "pm.test(\u0027Tempo de resposta menor que 2 segundos\u0027, function () {",
+                                                  "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+                                                  "});",
+                                                  "",
+                                                  "const contentType = pm.response.headers.get(\u0027Content-Type\u0027) || \u0027\u0027;",
+                                                  "if (contentType.includes(\u0027application/json\u0027) \u0026\u0026 pm.response.text()) {",
+                                                  "  pm.test(\u0027Resposta contem JSON valido\u0027, function () {",
+                                                  "    pm.expect(function () { pm.response.json(); }).not.to.throw();",
+                                                  "  });",
+                                                  "}",
+                                                  "",
+                                                  "if (path === \u0027/api/v1/users/login\u0027 \u0026\u0026 pm.response.code === 200 \u0026\u0026 pm.response.text()) {",
+                                                  "  const token = pm.response.text().replace(/^\"|\"$/g, \u0027\u0027);",
+                                                  "  pm.collectionVariables.set(\u0027token\u0027, token);",
+                                                  "  if (pm.environment.name) {",
+                                                  "    pm.environment.set(\u0027token\u0027, token);",
+                                                  "  }",
+                                                  "  console.log(\u0027token salvo\u0027);",
+                                                  "}",
+                                                  "",
+                                                  "if (pm.request.method === \u0027POST\u0027 \u0026\u0026 pm.response.code === 201) {",
+                                                  "  const response = pm.response.json();",
+                                                  "  const idVariableByPath = {",
+                                                  "    \u0027/api/v1/user-types\u0027: \u0027user_type_id\u0027,",
+                                                  "    \u0027/api/v1/users\u0027: \u0027user_id\u0027,",
+                                                  "    \u0027/api/v1/restaurants\u0027: \u0027restaurant_id\u0027,",
+                                                  "    \u0027/api/v1/menu-items\u0027: \u0027menu_item_id\u0027",
+                                                  "  };",
+                                                  "  const variableName = idVariableByPath[path];",
+                                                  "  if (variableName \u0026\u0026 response.id) {",
+                                                  "    pm.collectionVariables.set(variableName, response.id);",
+                                                  "    if (pm.environment.name) {",
+                                                  "      pm.environment.set(variableName, response.id);",
+                                                  "    }",
+                                                  "    console.log(`${variableName} salvo: ${response.id}`);",
+                                                  "  }",
+                                                  "}"
+                                              ]
+                                 }
+                  }
+              ],
+    "variable":  [
+                     {
+                         "key":  "base_url",
+                         "value":  "http://localhost:8080"
+                     },
+                     {
+                         "key":  "token",
+                         "value":  "",
+                         "description":  "JWT retornado por POST /api/v1/users/login."
+                     },
+                     {
+                         "key":  "user_type_id",
+                         "value":  "",
+                         "description":  "Preenchido ao criar um tipo de usuÃ¡rio."
+                     },
+                     {
+                         "key":  "user_id",
+                         "value":  "",
+                         "description":  "Preenchido ao criar um usuÃ¡rio."
+                     },
+                     {
+                         "key":  "restaurant_id",
+                         "value":  "",
+                         "description":  "Preenchido ao criar um restaurante."
+                     },
+                     {
+                         "key":  "menu_item_id",
+                         "value":  "",
+                         "description":  "Preenchido ao criar um item de cardÃ¡pio."
+                     },
+                     {
+                         "key":  "nonexistent_id",
+                         "value":  "999999",
+                         "description":  "ID usado nos fluxos de recurso inexistente."
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "Tipos de usuÃ¡rio",
+                     "description":  "Execute primeiro. O POST salva automaticamente a variÃ¡vel {{user_type_id}}.",
+                     "item":  [
+                                  {
+                                      "name":  "Criar tipo",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"name\":\"Cliente\"}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/user-types",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "user-types"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "201 - Criado",
+                                                           "status":  "Created",
+                                                           "code":  201,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Cliente\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"name\":\"must not be blank\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - Nome duplicado",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"JÃ¡ existe um tipo de usuÃ¡rio com esse nome\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Listar tipos",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/user-types",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "user-types"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Lista",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "[{\"id\":1,\"name\":\"Cliente\"}]"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Buscar tipo por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/user-types/{{user_type_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "user-types",
+                                                                               "{{user_type_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Encontrado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Cliente\"}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Atualizar tipo",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"name\":\"Dono de Restaurante\"}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/user-types/{{user_type_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "user-types",
+                                                                               "{{user_type_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Atualizado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Dono de Restaurante\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"name\":\"must not be blank\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - Nome duplicado",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"JÃ¡ existe um tipo de usuÃ¡rio com esse nome\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Excluir tipo",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/user-types/{{user_type_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "user-types",
+                                                                               "{{user_type_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "204 - ExcluÃ­do",
+                                                           "status":  "No Content",
+                                                           "code":  204,
+                                                           "header":  [
+
+                                                                      ],
+                                                           "body":  ""
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - Tipo em uso",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"A operaÃ§Ã£o viola uma restriÃ§Ã£o de integridade\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "UsuÃ¡rios",
+                     "description":  "Requer {{user_type_id}}. O POST salva automaticamente a variÃ¡vel {{user_id}}.",
+                     "item":  [
+                                  {
+                                      "name":  "Criar usuÃ¡rio",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"password\":\"Senha123\",\"street\":\"Rua A\",\"number\":\"10\",\"city\":\"SÃ£o Paulo\",\"state\":\"SP\",\"zipCode\":\"01001-000\",\"userTypeId\":{{user_type_id}}}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "201 - Criado",
+                                                           "status":  "Created",
+                                                           "code":  201,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"street\":\"Rua A\",\"number\":\"10\",\"city\":\"SÃ£o Paulo\",\"state\":\"SP\",\"zipCode\":\"01001-000\",\"userType\":{\"id\":1,\"name\":\"Cliente\"},\"updatedAt\":\"2026-06-14T12:00:00-03:00\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"email\":\"must be a well-formed email address\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - Tipo inexistente",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Tipo de usuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - E-mail duplicado",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"E-mail jÃ¡ cadastrado\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Login",
+                                      "request":  {
+                                                      "description":  "Autentica o usuario por email e senha. Execute apos criar o usuario Maria Silva; o token JWT retornado e salvo em {{token}}.",
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"email\":\"maria@example.com\",\"password\":\"Senha123\"}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users/login",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users",
+                                                                               "login"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Token gerado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "text/plain;charset=UTF-8"
+                                                                          }
+                                                                      ],
+                                                           "body":  "eyJhbGciOiJIUzI1NiJ9.exemplo.assinatura"
+                                                       },
+                                                       {
+                                                           "name":  "401 - Credenciais invalidas",
+                                                           "status":  "Unauthorized",
+                                                           "code":  401,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Email ou senha invalidos\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Listar usuÃ¡rios",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Lista",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Buscar usuÃ¡rio por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users/{{user_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users",
+                                                                               "{{user_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Encontrado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"UsuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Buscar usuÃ¡rios por nome",
+                                      "request":  {
+                                                      "description":  "Busca parcial e case-insensitive. Altere o parÃ¢metro para um termo inexistente e a API retornarÃ¡ [] com status 200.",
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users/search?name=RIA",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users",
+                                                                               "search"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "name",
+                                                                                    "value":  "RIA",
+                                                                                    "description":  "Trecho do nome, sem diferenciaÃ§Ã£o de caixa."
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Resultado parcial sem diferenciar caixa",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "[{\"id\":1,\"name\":\"Maria Silva\",\"email\":\"maria@example.com\",\"username\":\"maria\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}]"
+                                                       },
+                                                       {
+                                                           "name":  "200 - Nenhum resultado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "[]"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Atualizar usuÃ¡rio",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"username\":\"maria.souza\",\"street\":\"Rua B\",\"number\":\"20\",\"city\":\"SÃ£o Paulo\",\"state\":\"SP\",\"zipCode\":\"01002-000\",\"userTypeId\":{{user_type_id}}}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users/{{user_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users",
+                                                                               "{{user_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Atualizado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Maria Souza\",\"email\":\"maria.souza@example.com\",\"username\":\"maria.souza\",\"userType\":{\"id\":1,\"name\":\"Cliente\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"state\":\"must match [A-Za-z]{2}\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"UsuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - E-mail duplicado",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"E-mail jÃ¡ cadastrado\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Alterar senha",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"password\":\"NovaSenha123\"}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users/{{user_id}}/password",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users",
+                                                                               "{{user_id}}",
+                                                                               "password"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "204 - Senha alterada",
+                                                           "status":  "No Content",
+                                                           "code":  204,
+                                                           "header":  [
+
+                                                                      ],
+                                                           "body":  ""
+                                                       },
+                                                       {
+                                                           "name":  "400 - Senha invÃ¡lida",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"password\":\"size must be between 8 and 100\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"UsuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Excluir usuÃ¡rio",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/users/{{user_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "users",
+                                                                               "{{user_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "204 - ExcluÃ­do",
+                                                           "status":  "No Content",
+                                                           "code":  204,
+                                                           "header":  [
+
+                                                                      ],
+                                                           "body":  ""
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"UsuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - UsuÃ¡rio possui restaurante",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"UsuÃ¡rio Ã© dono de um restaurante e nÃ£o pode ser removido\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Restaurantes",
+                     "description":  "Requer {{user_id}}. O POST salva automaticamente a variÃ¡vel {{restaurant_id}}.",
+                     "item":  [
+                                  {
+                                      "name":  "Criar restaurante",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":{{user_id}}}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/restaurants",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "restaurants"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "201 - Criado",
+                                                           "status":  "Created",
+                                                           "code":  201,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"name\":\"must not be blank\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - Dono inexistente",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"UsuÃ¡rio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Listar restaurantes",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/restaurants",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "restaurants"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Lista",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "[{\"id\":1,\"name\":\"Cantina FIAP\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}]"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Buscar restaurante por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/restaurants/{{restaurant_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "restaurants",
+                                                                               "{{restaurant_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Encontrado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Cantina FIAP\",\"address\":\"Av. Paulista, 1000\",\"cuisineType\":\"Italiana\",\"openingHours\":\"11:00-23:00\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Atualizar restaurante",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"name\":\"Cantina FIAP Centro\",\"address\":\"Rua Central, 10\",\"cuisineType\":\"Italiana\",\"openingHours\":\"10:00-22:00\",\"ownerId\":{{user_id}}}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/restaurants/{{restaurant_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "restaurants",
+                                                                               "{{restaurant_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Atualizado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"name\":\"Cantina FIAP Centro\",\"ownerId\":1,\"ownerName\":\"Maria Silva\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"openingHours\":\"must not be blank\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Excluir restaurante",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/restaurants/{{restaurant_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "restaurants",
+                                                                               "{{restaurant_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "204 - ExcluÃ­do",
+                                                           "status":  "No Content",
+                                                           "code":  204,
+                                                           "header":  [
+
+                                                                      ],
+                                                           "body":  ""
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       },
+                                                       {
+                                                           "name":  "409 - Possui itens",
+                                                           "status":  "Conflict",
+                                                           "code":  409,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":409,\"error\":\"Conflict\",\"message\":\"Restaurante possui itens de cardÃ¡pio e nÃ£o pode ser removido\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Itens de cardÃ¡pio",
+                     "description":  "Requer {{restaurant_id}}. O POST salva automaticamente a variÃ¡vel {{menu_item_id}}.",
+                     "item":  [
+                                  {
+                                      "name":  "Criar item",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"restaurantId\":{{restaurant_id}},\"name\":\"Lasanha\",\"description\":\"Lasanha Ã  bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/menu-items",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "menu-items"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "201 - Criado",
+                                                           "status":  "Created",
+                                                           "code":  201,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"description\":\"Lasanha Ã  bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"price\":\"must be greater than or equal to 0.0\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - Restaurante inexistente",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Listar itens",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/menu-items?restaurantId={{restaurant_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "menu-items"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "restaurantId",
+                                                                                    "value":  "{{restaurant_id}}"
+                                                                                }
+                                                                            ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Lista",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "[{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"price\":39.90,\"dineInOnly\":false}]"
+                                                       },
+                                                       {
+                                                           "name":  "404 - Filtro de restaurante inexistente",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Restaurante nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Buscar item por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/menu-items/{{menu_item_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "menu-items",
+                                                                               "{{menu_item_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Encontrado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha\",\"description\":\"Lasanha Ã  bolonhesa\",\"price\":39.90,\"dineInOnly\":false,\"photoPath\":\"/images/lasanha.jpg\"}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardÃ¡pio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Atualizar item",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"restaurantId\":{{restaurant_id}},\"name\":\"Lasanha Grande\",\"description\":\"Serve duas pessoas\",\"price\":59.90,\"dineInOnly\":true,\"photoPath\":\"/images/lasanha-grande.jpg\"}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/menu-items/{{menu_item_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "menu-items",
+                                                                               "{{menu_item_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "200 - Atualizado",
+                                                           "status":  "OK",
+                                                           "code":  200,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"id\":1,\"restaurantId\":1,\"restaurantName\":\"Cantina FIAP\",\"name\":\"Lasanha Grande\",\"description\":\"Serve duas pessoas\",\"price\":59.90,\"dineInOnly\":true,\"photoPath\":\"/images/lasanha-grande.jpg\"}"
+                                                       },
+                                                       {
+                                                           "name":  "400 - Payload invÃ¡lido",
+                                                           "status":  "Bad Request",
+                                                           "code":  400,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":400,\"error\":\"Bad Request\",\"message\":\"Payload invÃ¡lido\",\"fields\":{\"photoPath\":\"must not be blank\"}}"
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardÃ¡pio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Excluir item",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{base_url}}/api/v1/menu-items/{{menu_item_id}}",
+                                                                  "host":  [
+                                                                               "{{base_url}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "v1",
+                                                                               "menu-items",
+                                                                               "{{menu_item_id}}"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+                                                       {
+                                                           "name":  "204 - ExcluÃ­do",
+                                                           "status":  "No Content",
+                                                           "code":  204,
+                                                           "header":  [
+
+                                                                      ],
+                                                           "body":  ""
+                                                       },
+                                                       {
+                                                           "name":  "404 - NÃ£o encontrado",
+                                                           "status":  "Not Found",
+                                                           "code":  404,
+                                                           "header":  [
+                                                                          {
+                                                                              "key":  "Content-Type",
+                                                                              "value":  "application/json"
+                                                                          }
+                                                                      ],
+                                                           "body":  "{\"status\":404,\"error\":\"Not Found\",\"message\":\"Item de cardÃ¡pio nÃ£o encontrado: 999\",\"fields\":{}}"
+                                                       }
+                                                   ]
+                                  }
+                              ]
+                 }
+             ]
 }
