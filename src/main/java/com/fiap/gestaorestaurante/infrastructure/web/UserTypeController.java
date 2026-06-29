@@ -1,6 +1,6 @@
 package com.fiap.gestaorestaurante.infrastructure.web;
 
-import com.fiap.gestaorestaurante.application.service.UserTypeService;
+import com.fiap.gestaorestaurante.core.controller.UserTypeCoreController;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.UserTypeRequest;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.UserTypeResponse;
 import jakarta.validation.Valid;
@@ -21,36 +21,36 @@ import java.util.List;
 @RequestMapping("/api/v1/user-types")
 public class UserTypeController {
 
-    private final UserTypeService service;
+    private final UserTypeCoreController controller;
 
-    public UserTypeController(UserTypeService service) {
-        this.service = service;
+    public UserTypeController(UserTypeCoreController controller) {
+        this.controller = controller;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserTypeResponse create(@Valid @RequestBody UserTypeRequest request) {
-        return UserTypeResponse.from(service.create(request.name()));
+        return UserTypeResponse.from(controller.create(request.name()));
     }
 
     @GetMapping
     public List<UserTypeResponse> findAll() {
-        return service.findAll().stream().map(UserTypeResponse::from).toList();
+        return controller.findAll().stream().map(UserTypeResponse::from).toList();
     }
 
     @GetMapping("/{id}")
     public UserTypeResponse findById(@PathVariable Long id) {
-        return UserTypeResponse.from(service.findById(id));
+        return UserTypeResponse.from(controller.findById(id));
     }
 
     @PutMapping("/{id}")
     public UserTypeResponse update(@PathVariable Long id, @Valid @RequestBody UserTypeRequest request) {
-        return UserTypeResponse.from(service.update(id, request.name()));
+        return UserTypeResponse.from(controller.update(id, request.name()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        controller.delete(id);
     }
 }

@@ -1,8 +1,7 @@
 package com.fiap.gestaorestaurante.infrastructure.web.config;
 
 
-import com.fiap.gestaorestaurante.application.service.TokenService;
-import com.fiap.gestaorestaurante.domain.model.User;
+import com.fiap.gestaorestaurante.infra.security.TokenService;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,7 +26,7 @@ public class AuthFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.equals("/api/v1/login")
-                || path.startsWith("/api/v1/users")
+                || path.startsWith("/api/v1/users/login")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-ui");
     }

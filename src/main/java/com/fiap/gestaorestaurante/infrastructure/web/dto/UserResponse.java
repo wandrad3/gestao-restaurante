@@ -1,6 +1,6 @@
 package com.fiap.gestaorestaurante.infrastructure.web.dto;
 
-import com.fiap.gestaorestaurante.domain.model.User;
+import com.fiap.gestaorestaurante.core.domain.User;
 
 import java.time.OffsetDateTime;
 

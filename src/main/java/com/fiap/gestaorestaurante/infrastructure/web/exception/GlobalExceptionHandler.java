@@ -1,5 +1,8 @@
 package com.fiap.gestaorestaurante.infrastructure.web.exception;
 
+import com.fiap.gestaorestaurante.core.exception.ConflictException;
+import com.fiap.gestaorestaurante.core.exception.CredenciaisInvalidasException;
+import com.fiap.gestaorestaurante.core.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

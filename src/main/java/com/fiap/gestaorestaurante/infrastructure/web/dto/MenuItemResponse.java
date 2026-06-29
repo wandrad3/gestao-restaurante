@@ -1,6 +1,6 @@
 package com.fiap.gestaorestaurante.infrastructure.web.dto;
 
-import com.fiap.gestaorestaurante.domain.model.MenuItem;
+import com.fiap.gestaorestaurante.core.domain.MenuItem;
 
 import java.math.BigDecimal;
 

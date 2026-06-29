@@ -1,6 +1,6 @@
 package com.fiap.gestaorestaurante.infrastructure.web.dto;
 
-import com.fiap.gestaorestaurante.domain.model.Restaurant;
+import com.fiap.gestaorestaurante.core.domain.Restaurant;
 
 public record RestaurantResponse(
         Long id,

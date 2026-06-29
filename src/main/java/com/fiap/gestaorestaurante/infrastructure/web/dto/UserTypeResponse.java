@@ -1,6 +1,6 @@
 package com.fiap.gestaorestaurante.infrastructure.web.dto;
 
-import com.fiap.gestaorestaurante.domain.model.UserType;
+import com.fiap.gestaorestaurante.core.domain.UserType;
 
 public record UserTypeResponse(Long id, String name) {
     public static UserTypeResponse from(UserType type) {
