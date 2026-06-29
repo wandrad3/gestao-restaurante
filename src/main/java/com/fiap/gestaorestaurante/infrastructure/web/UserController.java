@@ -1,11 +1,14 @@
 package com.fiap.gestaorestaurante.infrastructure.web;
 
+import com.fiap.gestaorestaurante.application.service.AuthService;
+import com.fiap.gestaorestaurante.application.service.TokenService;
 import com.fiap.gestaorestaurante.application.service.UserService;
-import com.fiap.gestaorestaurante.infrastructure.web.dto.PasswordRequest;
-import com.fiap.gestaorestaurante.infrastructure.web.dto.UserRequest;
-import com.fiap.gestaorestaurante.infrastructure.web.dto.UserResponse;
-import com.fiap.gestaorestaurante.infrastructure.web.dto.UserUpdateRequest;
+import com.fiap.gestaorestaurante.domain.model.Token;
+import com.fiap.gestaorestaurante.domain.model.User;
+import com.fiap.gestaorestaurante.infrastructure.web.dto.*;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +27,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
+
+    @Autowired
+    AuthService authService;
+
+    @Autowired
+    TokenService tokenService;
 
     private final UserService service;
 
@@ -67,5 +76,18 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+
+
+
+    @PostMapping("/login")
+    @Operation(
+            summary = "Realiza login do usuario e gera token JWT",
+            description = "Autentica o usuario com email e senha. Retorna um token JWT se as credenciais estiverem corretas."
+    )
+    public String login(@RequestBody Credentials credentials){
+        User user = authService.autenticar(credentials.email(), credentials.password());
+        return tokenService.createToken(user);
     }
 }

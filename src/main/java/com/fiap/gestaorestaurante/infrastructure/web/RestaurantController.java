@@ -3,6 +3,7 @@ package com.fiap.gestaorestaurante.infrastructure.web;
 import com.fiap.gestaorestaurante.application.service.RestaurantService;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.RestaurantRequest;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.RestaurantResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
