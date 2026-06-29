@@ -78,11 +78,10 @@ git clone <url-do-repositorio>
 cd gestao-restaurante
 ```
 
-### 2. Configurar as variáveis de ambiente
+### 2. Conferir as variáveis de ambiente
 
-```bash
-cp .env.example .env
-```
+O arquivo `.env` já está versionado para facilitar a execução do projeto em IDE
+e com Docker Compose durante a avaliação.
 
 Variáveis disponíveis:
 
@@ -93,6 +92,9 @@ Variáveis disponíveis:
 | `POSTGRES_PASSWORD` | Senha do banco | `change-me` |
 | `POSTGRES_PORT` | Porta externa do PostgreSQL | `5432` |
 | `APP_PORT` | Porta externa da API | `8080` |
+| `SPRING_DATASOURCE_URL` | JDBC para execução pela IDE | `jdbc:postgresql://localhost:5432/restaurant_db` |
+| `SPRING_DATASOURCE_USERNAME` | Usuário JDBC para execução pela IDE | `app` |
+| `SPRING_DATASOURCE_PASSWORD` | Senha JDBC para execução pela IDE | `change-me` |
 
 ### 3. Iniciar os serviços
 
@@ -129,12 +131,12 @@ docker compose down -v
 
 ## 💻 Execução local
 
-Configure a conexão com o PostgreSQL:
+Configure a conexão com o PostgreSQL ou carregue o `.env` pela IDE:
 
 ```bash
 export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/restaurant_db
 export SPRING_DATASOURCE_USERNAME=app
-export SPRING_DATASOURCE_PASSWORD=secret
+export SPRING_DATASOURCE_PASSWORD=change-me
 ```
 
 Compile e execute:
@@ -159,15 +161,21 @@ gestao-restaurante/
 │   ├── main/
 │   │   ├── java/com/fiap/gestaorestaurante/
 │   │   │   ├── Application.java
-│   │   │   ├── domain/
-│   │   │   │   └── model/                     # Entidades do domínio
-│   │   │   ├── application/
-│   │   │   │   └── service/                   # Casos de uso e regras
+│   │   │   ├── core/
+│   │   │   │   ├── controller/                # Controladores internos dos casos de uso
+│   │   │   │   ├── domain/                    # Entidades puras de negócio
+│   │   │   │   ├── dto/                       # Entradas dos casos de uso
+│   │   │   │   ├── exception/                 # Exceções de negócio
+│   │   │   │   ├── gateway/                   # Contratos para adapters externos
+│   │   │   │   └── usecase/                   # Regras e fluxos da aplicação
+│   │   │   ├── infra/
+│   │   │   │   ├── config/                    # Injeção dos use cases
+│   │   │   │   ├── database/                  # JPA, repositories, mappers e gateways
+│   │   │   │   └── security/                  # JWT, senha e UserDetailsService
 │   │   │   └── infrastructure/
-│   │   │       ├── persistence/               # Repositórios JPA
 │   │   │       └── web/
 │   │   │           ├── dto/                   # Contratos HTTP
-│   │   │           ├── exception/             # Erros centralizados
+│   │   │           ├── exception/             # Erros REST centralizados
 │   │   │           └── *Controller.java       # Endpoints REST
 │   │   └── resources/
 │   │       ├── application.yaml
@@ -175,13 +183,13 @@ gestao-restaurante/
 │   │           └── V1__create_initial_schema.sql
 │   └── test/
 │       ├── java/com/fiap/gestaorestaurante/
-│       │   ├── application/service/
-│       │   ├── infrastructure/persistence/
+│       │   ├── core/usecase/
+│       │   ├── infra/database/
 │       │   └── infrastructure/web/
 │       └── resources/application.yaml
 ├── docs/postman/
 │   └── gestao-restaurante.postman_collection.json
-├── .env.example
+├── .env
 ├── Dockerfile
 ├── docker-compose.yml
 ├── pom.xml
@@ -190,11 +198,11 @@ gestao-restaurante/
 
 ### Arquitetura
 
-O projeto adota uma separação inspirada em Clean Architecture:
+O projeto adota uma separação inspirada na POC de Clean Architecture:
 
-- **Domain:** entidades e comportamentos centrais.
-- **Application:** casos de uso e regras de negócio.
-- **Infrastructure:** persistência JPA, API HTTP e configurações técnicas.
+- **Core:** domínio puro, DTOs internos, gateways, use cases e controllers internos.
+- **Infra:** adapters técnicos para JPA, segurança, JWT, senha e injeção de dependências.
+- **Infrastructure/Web:** controllers REST, payloads HTTP, Swagger, filtros e tratamento de erros.
 
 Relacionamentos principais:
 
