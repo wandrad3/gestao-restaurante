@@ -56,6 +56,12 @@ class ApiIntegrationTest {
         mockMvc.perform(get("/api/v1/users/{id}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("maria@example.com"));
+        mockMvc.perform(get("/api/v1/users/search").param("name", "Maria da Silva"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Maria da Silva"));
+        mockMvc.perform(get("/api/v1/users/search").param("name", "ria da"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("Maria da Silva"));
         mockMvc.perform(get("/api/v1/users/search").param("name", "RIA DA"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Maria da Silva"));
