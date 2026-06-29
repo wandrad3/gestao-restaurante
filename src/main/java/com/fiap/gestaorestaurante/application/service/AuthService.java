@@ -2,16 +2,14 @@ package com.fiap.gestaorestaurante.application.service;
 
 import com.fiap.gestaorestaurante.domain.model.User;
 import com.fiap.gestaorestaurante.infrastructure.persistence.UserRepository;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.CredenciaisInvalidasException;
+import com.fiap.gestaorestaurante.core.exception.CredenciaisInvalidasException;
 import io.micrometer.common.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-@Service
 public class AuthService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;

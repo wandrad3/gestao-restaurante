@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,7 +16,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
 public class TokenService {
     private static final Logger log = LoggerFactory.getLogger(TokenService.class);
 

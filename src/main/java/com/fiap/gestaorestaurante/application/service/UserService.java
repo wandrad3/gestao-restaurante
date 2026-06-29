@@ -6,15 +6,13 @@ import com.fiap.gestaorestaurante.infrastructure.persistence.RestaurantRepositor
 import com.fiap.gestaorestaurante.infrastructure.persistence.UserRepository;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.UserRequest;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.UserUpdateRequest;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.ConflictException;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.ResourceNotFoundException;
+import com.fiap.gestaorestaurante.core.exception.ConflictException;
+import com.fiap.gestaorestaurante.core.exception.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
 @Transactional
 public class UserService {
 

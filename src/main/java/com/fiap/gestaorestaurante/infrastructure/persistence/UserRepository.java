@@ -4,11 +4,13 @@ import com.fiap.gestaorestaurante.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
+@NoRepositoryBean
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Override

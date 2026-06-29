@@ -3,10 +3,12 @@ package com.fiap.gestaorestaurante.infrastructure.persistence;
 import com.fiap.gestaorestaurante.domain.model.MenuItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;
 import java.util.Optional;
 
+@NoRepositoryBean
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
     @Override
     @EntityGraph(attributePaths = "restaurant")

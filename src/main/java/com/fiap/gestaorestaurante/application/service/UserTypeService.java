@@ -2,14 +2,12 @@ package com.fiap.gestaorestaurante.application.service;
 
 import com.fiap.gestaorestaurante.domain.model.UserType;
 import com.fiap.gestaorestaurante.infrastructure.persistence.UserTypeRepository;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.ConflictException;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.ResourceNotFoundException;
-import org.springframework.stereotype.Service;
+import com.fiap.gestaorestaurante.core.exception.ConflictException;
+import com.fiap.gestaorestaurante.core.exception.ResourceNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
 @Transactional
 public class UserTypeService {
 

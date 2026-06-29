@@ -4,13 +4,11 @@ import com.fiap.gestaorestaurante.domain.model.MenuItem;
 import com.fiap.gestaorestaurante.domain.model.Restaurant;
 import com.fiap.gestaorestaurante.infrastructure.persistence.MenuItemRepository;
 import com.fiap.gestaorestaurante.infrastructure.web.dto.MenuItemRequest;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.ResourceNotFoundException;
-import org.springframework.stereotype.Service;
+import com.fiap.gestaorestaurante.core.exception.ResourceNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
 @Transactional
 public class MenuItemService {
 

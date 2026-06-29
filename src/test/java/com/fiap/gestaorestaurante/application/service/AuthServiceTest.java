@@ -3,7 +3,7 @@ package com.fiap.gestaorestaurante.application.service;
 import com.fiap.gestaorestaurante.domain.model.User;
 import com.fiap.gestaorestaurante.domain.model.UserType;
 import com.fiap.gestaorestaurante.infrastructure.persistence.UserRepository;
-import com.fiap.gestaorestaurante.infrastructure.web.exception.CredenciaisInvalidasException;
+import com.fiap.gestaorestaurante.core.exception.CredenciaisInvalidasException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
