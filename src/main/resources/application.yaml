@@ -2,9 +2,9 @@ spring:
   application:
     name: gestao-restaurante
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/restaurant_db}
-    username: ${SPRING_DATASOURCE_USERNAME:app}
-    password: ${SPRING_DATASOURCE_PASSWORD:secret}
+    url: jdbc:postgresql://localhost:5432/restaurant_db
+    username: app
+    password: change-me
   jpa:
     open-in-view: false
     hibernate:
@@ -15,4 +15,4 @@ spring:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
